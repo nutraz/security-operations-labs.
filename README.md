@@ -3,13 +3,6 @@
 </p>
 
 ## Assets & Project Structure
-
-```
-nutrazz@fedora:~/GEMENI/security-operations-labs$ ls -la /home/nutrazz/GEMENI/security-operations-labs/assets/soc-pixel-logo.png
--rw-r--r--. 1 nutrazz nutrazz 1199988 Jan 28 23:52 /home/nutrazz/GEMENI/security-operations-labs/assets/soc-pixel-logo.png
-nutrazz@fedora:~/GEMENI/security-operations-labs$ 
-```
-
 # Security Operations Labs & Threat Intelligence Notes
 
 <p align="center">
