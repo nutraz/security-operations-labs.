@@ -2,7 +2,7 @@
   <img src="assets/soc-pixel-logo.png" width="128" alt="Security Operations Pixel Logo">
 </p>
 
-## Assets & Project Structure
+
 # Security Operations Labs & Threat Intelligence Notes
 
 <p align="center">
