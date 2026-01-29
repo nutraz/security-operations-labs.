@@ -15,12 +15,22 @@ This document walks through the analysis of a suspicious email.
 
 #### Step 1: Sender & Header Analysis
 
--   **Display Name vs. Actual Address:** The "From" address `accounts.payable@compnay.com` is a **spoof**. The `a` is missing from "company".
--   **Analyze Email Headers:**
-    -   Look at the `Received` headers to trace the email's path. Does it originate from a trusted mail server associated with the legitimate company?
-    -   Check the `Return-Path` or `Reply-To` header. Often, this will be the attacker's actual email address.
-    -   Check SPF/DKIM/DMARC results in the headers. A legitimate email should pass these checks. This one will likely show `SPF: SoftFail` or `Fail`.
--   **Conclusion:** The sender is impersonated. This is a classic phishing indicator.
+Email headers contain a wealth of information crucial for determining an email's legitimacy and origin.
+
+-   **Display Name vs. Actual Address:** The "From" address `accounts.payable@compnay.com` is a **spoof**. The `a` is missing from "company". Always verify the actual email address, not just the display name.
+-   **Analyze Email Headers (Key Headers to Examine):**
+    -   `Received`: These headers show the path an email took from sender to recipient. Read them bottom-up. Look for:
+        -   Unusual sending IP addresses or domains.
+        -   Discrepancies between the sending server and the purported sender's domain.
+        -   Too many hops, or unexpected internal servers.
+    -   `Return-Path` or `Reply-To`: Often reveals the true sender's email address, which might differ from the "From" address, indicating spoofing.
+    -   `Authentication-Results`: This header provides the results of SPF, DKIM, and DMARC checks.
+        -   `SPF (Sender Policy Framework)`: Checks if the sending IP is authorized by the sender's domain. `SoftFail`, `Fail`, or `Neutral` are red flags.
+        -   `DKIM (DomainKeys Identified Mail)`: Verifies the sender's identity and ensures the email hasn't been tampered with. `Fail` indicates a problem.
+        -   `DMARC (Domain-based Message Authentication Authentication, Reporting & Conformance)`: Combines SPF and DKIM. A `Fail` indicates a likely spoofed email.
+    -   `X-Originating-IP` or `X-Mailer`: Can sometimes reveal the actual IP address of the sender's client.
+    -   `Message-ID`: A unique identifier for the email; unusual formats can sometimes be a red flag.
+-   **Conclusion:** The sender is impersonated, and header analysis (especially SPF/DKIM/DMARC failures) confirms this. This is a classic phishing indicator.
 
 #### Step 2: Content & Tone Analysis
 

@@ -1,0 +1,21 @@
+// Brute Force Attack Detection
+// Platform: KQL (Microsoft Sentinel / Log Analytics)
+// MITRE ATT&CK: T1110 - Brute Force
+
+SecurityEvent
+| where EventID in (4625, 4624)
+| where TargetUserName == "administrator" and WorkstationName == "WEBSRV01"
+| summarize FailedCount = countif(EventID == 4625), 
+            SuccessCount = countif(EventID == 4624)
+by bin(TimeGenerated, 5m), SourceNetworkAddress, TargetUserName, WorkstationName
+| where FailedCount >= 5
+| extend Verdict = case(SuccessCount > 0, "CRITICAL: Successful compromise detected",
+                        "WARNING: Brute force attempt in progress")
+| project TimeGenerated, SourceNetworkAddress, TargetUserName, WorkbsationName, 
+          FailedCount, SuccessCount, Verdict
+| sort by TimeGenerated desc
+
+---
+*Windows Security Event IDs: 4625 (Failed), 4624 (Success)*
+*Detection: 5+ failures within 5-minute window*
+

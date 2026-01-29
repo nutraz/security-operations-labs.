@@ -1,0 +1,22 @@
+// PowerShell Suspicious Execution Detection
+// Platform: KQL (Microsoft Sentinel / Log Analytics)
+// MITRE ATT&CK: T1059.001 - PowerShell
+
+// Detect encoded PowerShell commands
+Event
+| where EventID == 4104  // PowerShell Script Block Logging
+| where ScriptBlockText contains "-EncodedCommand" or ScriptBlockText contains "-enc"
+| project TimeGenerated, Computer, ScriptBlockText, ScriptBlockId
+
+// Detect PowerShell downloading and executing remote scripts
+| where ScriptBlockText contains "Net.WebClient" and ScriptBlockText contains "DownloadString"
+| project TimeGenerated, Computer, ScriptBlockText
+
+// Detect suspicious parent process (Word spawning PowerShell)
+| where ScriptBlockText contains "winword.exe" and ScriptBlockText contains "powershell.exe"
+| project TimeGenerated, Computer, ScriptBlockText
+
+---
+*Windows Event ID 4104: PowerShell Script Block Logging*
+*Key Indicators: -EncodedCommand, Net.WebClient, DownloadString*
+

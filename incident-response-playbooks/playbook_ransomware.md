@@ -33,6 +33,9 @@ This document outlines the high-level workflow for responding to a ransomware in
 -   **IMMEDIATE GOAL:** Stop the bleeding. Prevent the ransomware from spreading further.
 -   **Actions:**
     -   **Isolate affected hosts:** Disconnect them from the network immediately (unplug ethernet cable, disable Wi-Fi). Do NOT power them off unless instructed, as this destroys volatile memory evidence.
+    *   **Decision Point: Power Off or Keep Running?**
+        *   **IF** Memory forensics is required (e.g., fileless malware, advanced persistent threat suspected): Keep system running, acquire memory dump before isolation.
+        *   **ELSE IF** Rapid containment is paramount, and memory forensics is not a priority (e.g., clear, widespread file encryption): Power off immediately after documenting state.
     -   **Segment the network:** If possible, use VLANs or firewall rules to isolate the subnet where the infection is located.
     -   **Disable compromised user accounts:** The initial entry vector may be a compromised account. Disable it pending investigation.
     -   **Block C2 servers:** If any Command & Control IP addresses or domains are identified, block them at the firewall/proxy.
@@ -44,6 +47,9 @@ This document outlines the high-level workflow for responding to a ransomware in
     -   Identify the initial point of entry (e.g., phishing email, vulnerable public-facing server).
     -   Identify all compromised systems and user accounts.
     -   For affected systems, the safest path is to **rebuild from a known-good, clean image**. Do not simply "clean" the machine, as rootkits or backdoors may persist.
+    *   **Decision Point: Rebuild or Attempt Clean?**
+        *   **IF** System is critical and rebuild time is prohibitive, AND confidence in cleaning tools is high: Attempt clean with multiple reputable tools. Proceed with extreme caution and continuous monitoring.
+        *   **ELSE** (Recommended) Rebuild the system from scratch using a trusted, hardened image.
     -   Force a password reset for all users, especially for compromised and administrative accounts.
 
 ### 5. Recovery
@@ -51,6 +57,9 @@ This document outlines the high-level workflow for responding to a ransomware in
 -   **GOAL:** Restore normal business operations.
 -   **Actions:**
     -   Restore encrypted files from clean, tested backups. Prioritize critical systems first.
+    *   **Decision Point: Pay Ransom or Restore from Backup?**
+        *   **IF** No viable/recent backups exist OR data criticality demands immediate decryption AND organizational policy permits: Engage specialized ransomware negotiation firm.
+        *   **ELSE** (Recommended) Do NOT pay the ransom. Restore from verified clean backups.
     -   Bring rebuilt systems back online, ensuring they are fully patched and configured with enhanced security settings.
     -   Monitor the environment closely for any signs of residual adversary activity.
 

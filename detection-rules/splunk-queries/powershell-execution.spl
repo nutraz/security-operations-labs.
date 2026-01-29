@@ -1,0 +1,29 @@
+// PowerShell Suspicious Execution Detection
+// Platform: Splunk
+// MITRE ATT&CK: T1059.001 - PowerShell
+
+// Detect PowerShell with encoded commands
+index=windows EventCode=4104 ScriptBlockText=*EncodedCommand*
+| rex field=ScriptBlockText "(?i)-enc\s+([^\s]+)"
+| table _time, Computer, ScriptBlockText, ScriptBlockId
+| where isnotnull(_1)
+
+// Detect PowerShell downloading files
+index=windows EventCode=4104 
+| search ScriptBlockText="*Net.WebClient*" OR ScriptBlockText="*DownloadString*"
+| table _time, Computer, ScriptBlockText
+| head 100
+
+// Detect suspicious parent-child process relationships
+index=winevent EventCode=4688 ParentProcessName="*winword.exe" NewProcessName="*powershell.exe"
+| table _time, Computer, NewProcessName, ParentProcessName, CommandLine
+| sort -_time
+
+// Detect Base64 encoded strings being decoded
+index=windows EventCode=4104 ScriptBlockText="*FromBase64String*"
+| table _time, Computer, ScriptBlockText
+
+---
+*Windows Event Code 4104: PowerShell Script Block Logging*
+*Key Indicators: -EncodedCommand, Net.WebClient, DownloadString*
+

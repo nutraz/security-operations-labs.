@@ -1,0 +1,30 @@
+// Brute Force Attack Detection Query
+// Platform: Splunk
+// MITRE ATT&CK: T1110 - Brute Force
+
+index=windows EventID=4625 OR EventID=4624
+| search WorkstationName=WEBSRV01 TargetUserName=administrator
+| stats count as attempts by EventID, SourceNetworkAddress, TargetUserName
+| where attempts >= 5
+| eval status = case(EventID=4625, "Failed", EventID=4624, "Success")
+| sort -_time
+| table _time, EventID, SourceNetworkAddress, TargetUserName, WorkstationName, status, attempts
+
+// Alert if more than 5 failed attempts in 5 minutes
+| where attempts > 5
+| alert threshold type=number count=5
+
+// Alternative: Correlate failed then successful logins
+index=windows EventID=4625 TargetUserName=administrator
+| stats count as failures by SourceNetworkAddress, WorkstationName
+| where failures >= 5
+| join type=outer WorkstationName [search index=windows EventID=4624 TargetUserName=administrator 
+  [| stats count as successes by SourceNetworkAddress, WorkstationName 
+  | where successes >= 1]]
+| eval verdict = if(isnotnull(successes), "CRITICAL: Brute force successful!", "WARNING: Brute force attempt in progress")
+| table _time, SourceNetworkAddress, WorkstationName, failures, successes, verdict
+
+---
+*Windows Security Events: 4625 (Failed), 4624 (Success)*
+*Detection: 5+ failures in 5 minute window*
+

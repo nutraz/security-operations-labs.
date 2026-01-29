@@ -1,0 +1,52 @@
+title: Brute Force Attack Detection
+description: Detects multiple failed login attempts followed by successful authentication
+author: SOC Team
+date: 2026-01-28
+tags:
+  - attack.privilege_escalation
+  - attack.persistence
+  - attack.initial_access
+  - attack.t1110
+
+logsource:
+  product: windows
+  service: security
+  definition: 'Security Event Logging must be enabled'
+
+detection:
+  selection:
+    EventID:
+      - 4625  # Failed login
+      - 4624  # Successful login
+    WorkstationName: WEBSRV01
+    TargetUserName: administrator
+    
+  timeframe: 5m
+  condition: selection
+  
+  # Brute force pattern: >= 5 failed logins followed by success
+  brute_force:
+    - selection | where Status == 4625 | stats count as failures by TargetUserName, WorkstationName
+    - | where failures >= 5
+    - selection | where Status == 4624 | stats count as successes by TargetUserName, WorkstationName
+    - | where successes >= 1
+
+fields:
+  - EventID
+  - WorkstationName
+  - TargetUserName
+  - SourceNetworkAddress
+  - LogonType
+  - Status
+
+falsepositives:
+  - User forgetting password
+  - Legacy applications with hardcoded credentials
+  - Scheduled tasks with incorrect passwords
+
+level: high
+
+---
+*MITRE ATT&CK: T1110 - Brute Force*
+*Windows Event IDs: 4625 (Failure), 4624 (Success)*
+

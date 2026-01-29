@@ -1,0 +1,31 @@
+// Phishing Indicators Detection
+// Platform: KQL (Microsoft Sentinel / Log Analytics)
+// MITRE ATT&CK: T1566 - Phishing
+
+// Query 1: Detect emails with suspicious sender domains (typosquatting)
+// Description: This query looks for emails where the sender domain is a suspected typosquatted domain.
+EmailEvents
+| where SenderFromDomain has "compnay.com" // Example from walkthrough
+| project TimeGenerated, SenderFromAddress, Subject, UrlCount, AttachmentCount
+| extend Reason = "Suspicious Sender Domain (Typosquatting)";
+
+// Query 2: Detect emails with subjects containing urgent keywords and "invoice"
+// Description: This query searches for emails with subjects designed to create a sense of urgency.
+EmailEvents
+| where Subject has "Urgent" and Subject has "Invoice"
+| project TimeGenerated, SenderFromAddress, Subject, UrlCount, AttachmentCount
+| extend Reason = "Suspicious Email Subject (Urgency)";
+
+// Query 3: Detect network connections to known malicious IPs from phishing campaigns
+// Description: This query identifies any network traffic to IP addresses known to be associated with phishing C2 servers.
+CommonSecurityLog
+| where DestinationIP == "45.67.89.123" // Example C2 IP from walkthrough
+| project TimeGenerated, SourceIP, DestinationIP, RequestURL
+| extend Reason = "Network Connection to Known Malicious IP";
+
+// Query 4: Detect network connections to known malicious URLs from phishing campaigns
+// Description: This query identifies any network traffic to URLs known to be used for downloading malware.
+CommonSecurityLog
+| where RequestURL has "totally-legit-files.xyz" // Example URL from walkthrough
+| project TimeGenerated, SourceIP, DestinationIP, RequestURL
+| extend Reason = "Network Connection to Known Malicious URL";

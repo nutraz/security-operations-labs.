@@ -11,6 +11,56 @@
 
 ---
 
+### Detection Rules
+
+Here are examples of detection rules that would trigger this type of alert:
+
+#### Splunk Query
+
+```splunk
+index=windows EventID=4625 OR EventID=4624
+| search WorkstationName=WEBSRV01 TargetUserName=administrator
+| stats count as attempts by EventID, SourceNetworkAddress, TargetUserName
+| where attempts >= 5
+| eval status = case(EventID=4625, "Failed", EventID=4624, "Success")
+| sort -_time
+| table _time, EventID, SourceNetworkAddress, TargetUserName, WorkstationName, status, attempts
+
+// Alert if more than 5 failed attempts in 5 minutes
+| where attempts > 5
+| alert threshold type=number count=5
+
+// Alternative: Correlate failed then successful logins
+index=windows EventID=4625 TargetUserName=administrator
+| stats count as failures by SourceNetworkAddress, WorkstationName
+| where failures >= 5
+| join type=outer WorkstationName [search index=windows EventID=4624 TargetUserName=administrator
+  [| stats count as successes by SourceNetworkAddress, WorkstationName
+  | where successes >= 1]]
+| eval verdict = if(isnotnull(successes), "CRITICAL: Brute force successful!", "WARNING: Brute force attempt in progress")
+| table _time, SourceNetworkAddress, WorkstationName, failures, successes, verdict
+```
+
+#### KQL Query (Microsoft Sentinel / Log Analytics)
+
+```kql
+SecurityEvent
+| where EventID in (4625, 4624)
+| where TargetUserName == "administrator" and WorkstationName == "WEBSRV01"
+| summarize FailedCount = countif(EventID == 4625),
+            SuccessCount = countif(EventID == 4624)
+by bin(TimeGenerated, 5m), SourceNetworkAddress, TargetUserName, WorkstationName
+| where FailedCount >= 5
+| extend Verdict = case(SuccessCount > 0, "CRITICAL: Successful compromise detected",
+                        "WARNING: Brute force attempt in progress")
+| project TimeGenerated, SourceNetworkAddress, TargetUserName, WorkbsationName,
+          FailedCount, SuccessCount, Verdict
+| sort by TimeGenerated desc
+```
+
+---
+
+
 ### Sample Logs (SIEM View)
 
 ```

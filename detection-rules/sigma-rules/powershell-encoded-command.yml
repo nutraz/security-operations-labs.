@@ -1,0 +1,54 @@
+title: PowerShell Encoded Command Execution
+description: Detects suspicious PowerShell command execution with encoded arguments
+author: SOC Team
+date: 2026-01-28
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.defense_evasion
+
+logsource:
+  product: windows
+  service: powershell
+  definition: 'PowerShell Script Block Logging must be enabled (Event ID 4104)'
+
+detection:
+  selection:
+    EventID: 4104
+    ScriptBlockText|contains|all:
+      - 'Net.WebClient'
+      - 'DownloadString'
+      
+  selection_encoded:
+    EventID: 4104
+    ScriptBlockText|contains:
+      - '-EncodedCommand'
+      - '-enc'
+      - '-e '
+      
+  selection_obfuscated:
+    EventID: 4104
+    ScriptBlockText|contains:
+      - '::FromBase64String'
+      - 'IEX'
+      - 'New-Object'
+
+  condition: selection or selection_encoded or selection_obfuscated
+
+fields:
+  - EventID
+  - ScriptBlockText
+  - ScriptBlockId
+  - TimeCreated
+
+falsepositives:
+  - Legitimate PowerShell scripts using encoding
+  - Administrative scripts with Base64 commands
+
+level: high
+
+---
+*MITRE ATT&CK: T1059.001 - PowerShell*
+*Windows Event IDs: 4104 (Script Block Logging)*
+*Detection: Monitor for encoded commands, DownloadString usage*
+
