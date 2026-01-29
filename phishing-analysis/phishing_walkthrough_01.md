@@ -46,7 +46,7 @@ Email headers contain a wealth of information crucial for determining an email's
 -   **Sandbox Results:**
     -   The `.zip` file contains a file named `invoice_details.js` (a JavaScript file).
     -   When executed, `invoice_details.js` runs a PowerShell command.
-    -   The PowerShell command downloads another file (`payload.exe`) from a suspicious URL (`http://totally-legit-files.xyz/payload.exe`).
+    -   The PowerShell command downloads another file (`payload.exe`) from a suspicious URL (`https://totally-legit-files.xyz/payload.exe`).
     -   `payload.exe` is identified by multiple AV engines as a known trojan (e.g., Agent Tesla, Qakbot).
     -   The payload attempts to make network connections to a C2 server at `45.67.89.123`.
 
@@ -59,7 +59,7 @@ From the analysis, we have the following IOCs:
 -   **Attachment Hash (SHA256):** `[hash_of_Invoice_INV-08736.zip]`
 -   **File Hash (SHA256):** `[hash_of_invoice_details.js]`
 -   **File Hash (SHA256):** `[hash_of_payload.exe]`
--   **Malicious URL:** `http://totally-legit-files.xyz/payload.exe`
+-   **Malicious URL:** `https://totally-legit-files.xyz/payload.exe`
 -   **C2 IP Address:** `45.67.89.123`
 
 ### 3. Response & Remediation

